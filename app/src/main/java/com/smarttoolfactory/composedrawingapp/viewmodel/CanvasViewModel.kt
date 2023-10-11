@@ -3,7 +3,9 @@ package com.smarttoolfactory.composedrawingapp.viewmodel
 import androidx.lifecycle.ViewModel
 import com.smarttoolfactory.composedrawingapp.DrawMode
 import com.smarttoolfactory.composedrawingapp.gesture.MotionEvent
+import com.smarttoolfactory.composedrawingapp.model.SampleLine
 import com.smarttoolfactory.composedrawingapp.model.MyLine
+import com.smarttoolfactory.composedrawingapp.model.UsersLine
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -19,10 +21,11 @@ class CanvasViewModel: ViewModel() {
     private val _motionEvent = MutableStateFlow(MotionEvent.Idle)
     val motionEvent: StateFlow<MotionEvent> = _motionEvent
 
-    fun updateLine(newLine: MyLine) {
+    fun updateLine(newLine: UsersLine) {
         // For my use case there should only be 1 line from user.
         mutableLineList.clear()
         mutableLineList.add(newLine)
+        mutableLineList.add(SampleLine.fromUsersLine(newLine))
         updateToFlow()
     }
 

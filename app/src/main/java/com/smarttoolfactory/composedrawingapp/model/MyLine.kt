@@ -1,23 +1,38 @@
 package com.smarttoolfactory.composedrawingapp.model
 
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
-import android.graphics.Path as AndroidPath
-import androidx.compose.ui.graphics.asComposePath
+import com.smarttoolfactory.composedrawingapp.util.PathMeasureUtil
 
-data class MyLine(
-    val path: Path,
-    val pathProperties: PathProperties = PathProperties.DEFAULT
-) {
+sealed class MyLine(
+    open val path: Path,
+    open val pathProperties: PathProperties
+)
 
+data class UsersLine(
+    override val path: Path,
+    override val pathProperties: PathProperties = PathProperties.DEFAULT
+) : MyLine(path, pathProperties) {
 
     companion object {
-        val EMPTY = MyLine(Path())
+        val EMPTY = UsersLine(Path())
+    }
+}
 
-        fun createFromAndroidPath(
-            path: AndroidPath,
-            pathProperties: PathProperties = PathProperties.DEFAULT
-        ): MyLine {
-            return MyLine(path.asComposePath(), pathProperties)
+data class SampleLine(
+    override val path: Path,
+    override val pathProperties: PathProperties = DIRECT_LINE_PROPERTIES
+): MyLine(path, pathProperties) {
+
+    companion object {
+        private val DIRECT_LINE_PROPERTIES = PathProperties(
+            strokeWidth = 5f,
+            color = Color.Cyan
+        )
+
+        fun fromUsersLine(usersLine: UsersLine): SampleLine {
+            val sampler = PathMeasureUtil.sampler(usersLine.path)
+            return SampleLine(sampler)
         }
     }
 }

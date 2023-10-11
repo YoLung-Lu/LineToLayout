@@ -22,6 +22,7 @@ import com.smarttoolfactory.composedrawingapp.gesture.MotionEvent
 import com.smarttoolfactory.composedrawingapp.gesture.dragMotionEvent
 import com.smarttoolfactory.composedrawingapp.model.MyLine
 import com.smarttoolfactory.composedrawingapp.model.PathProperties
+import com.smarttoolfactory.composedrawingapp.model.UsersLine
 
 /**
  * Paths that are added, this is required to have paths with different options and paths
@@ -33,7 +34,7 @@ fun DrawingCanvas(
     paths: List<MyLine>,
     drawMode: DrawMode,
     motionEvent: MotionEvent,
-    updateLine: (MyLine) -> Unit,
+    updateLine: (UsersLine) -> Unit,
     updateMotionEvent: (MotionEvent) -> Unit = {},
     clearRedo: () -> Unit,
     ifDebug: Boolean = false
@@ -142,7 +143,7 @@ fun DrawingCanvas(
 
                         // Pointer is up save current path
 //                        paths[currentPath] = currentPathProperty
-                        updateLine.invoke(MyLine(currentPath, currentPathProperty))
+                        updateLine.invoke(UsersLine(currentPath, currentPathProperty))
 
                         // Since paths are keys for map, use new one for each key
                         // and have separate path for each down-move-up gesture cycle
