@@ -1,6 +1,5 @@
 package com.smarttoolfactory.composedrawingapp
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -11,6 +10,8 @@ import androidx.compose.ui.graphics.*
 import androidx.compose.ui.unit.dp
 import com.smarttoolfactory.composedrawingapp.gesture.MotionEvent
 import com.smarttoolfactory.composedrawingapp.model.MyLine
+import com.smarttoolfactory.composedrawingapp.model.MyPoints
+import com.smarttoolfactory.composedrawingapp.model.UsersLine
 import com.smarttoolfactory.composedrawingapp.ui.canvas.DrawingCanvas
 import com.smarttoolfactory.composedrawingapp.ui.menu.LayoutInfoMenus
 import com.smarttoolfactory.composedrawingapp.ui.theme.backgroundColor
@@ -22,16 +23,18 @@ fun DrawingApp(
     viewModel: CanvasViewModel
 ) {
     val paths by viewModel.lineList.collectAsState()
+    val points by viewModel.points.collectAsState()
     val drawMode by viewModel.drawMode.collectAsState()
     val motionEvent by viewModel.motionEvent.collectAsState()
 
     DrawingApp(
         paddingValues = paddingValues,
         paths = paths,
+        points = points,
         drawMode = drawMode,
         motionEvent = motionEvent,
         updateLine = viewModel::updateLine,
-        clearRedo = viewModel::clearRedo,
+        clear = viewModel::clear,
         updateMotionEvent = viewModel::updateMotionEvent
     )
 }
@@ -40,10 +43,11 @@ fun DrawingApp(
 fun DrawingApp(
     paddingValues: PaddingValues,
     paths: List<MyLine>,
+    points: MyPoints,
     drawMode: DrawMode,
     motionEvent: MotionEvent,
-    updateLine: (MyLine) -> Unit,
-    clearRedo: () -> Unit = {},
+    updateLine: (UsersLine) -> Unit,
+    clear: () -> Unit = {},
     updateMotionEvent: (MotionEvent) -> Unit = {}
 ) {
     // Debug.
@@ -57,12 +61,13 @@ fun DrawingApp(
         DrawingCanvas(
             columnScope = this,
             paths = paths,
+            points = points,
             drawMode = drawMode,
             motionEvent = motionEvent,
             updateLine = updateLine,
             updateMotionEvent = updateMotionEvent,
-            clearRedo = clearRedo,
-            ifDebug = true
+            clear = clear,
+            ifDebug = false
         )
 
         LayoutInfoMenus(
