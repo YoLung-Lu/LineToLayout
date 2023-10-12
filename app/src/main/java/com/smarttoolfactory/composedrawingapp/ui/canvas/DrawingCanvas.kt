@@ -15,10 +15,12 @@ import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
+import androidx.core.graphics.withSave
 import com.smarttoolfactory.composedrawingapp.DrawMode
 import com.smarttoolfactory.composedrawingapp.gesture.MotionEvent
 import com.smarttoolfactory.composedrawingapp.gesture.dragMotionEvent
 import com.smarttoolfactory.composedrawingapp.model.MyLine
+import com.smarttoolfactory.composedrawingapp.model.MyPoints
 import com.smarttoolfactory.composedrawingapp.model.PathProperties
 import com.smarttoolfactory.composedrawingapp.model.UsersLine
 
@@ -30,11 +32,12 @@ import com.smarttoolfactory.composedrawingapp.model.UsersLine
 fun DrawingCanvas(
     columnScope: ColumnScope,
     paths: List<MyLine>,
+    points: MyPoints,
     drawMode: DrawMode,
     motionEvent: MotionEvent,
     updateLine: (UsersLine) -> Unit,
     updateMotionEvent: (MotionEvent) -> Unit = {},
-    clearLine: () -> Unit,
+    clear: () -> Unit,
     ifDebug: Boolean = false
 ) {
 
@@ -108,7 +111,7 @@ fun DrawingCanvas(
                         currentPath.moveTo(currentPosition.x, currentPosition.y)
                     }
 
-                    clearLine.invoke()
+                    clear.invoke()
                     previousPosition = currentPosition
 
                 }
@@ -159,67 +162,9 @@ fun DrawingCanvas(
                 else -> Unit
             }
 
-            with(drawContext.canvas.nativeCanvas) {
-
-                val checkPoint = saveLayer(null, null)
-
-                paths.forEach {
-
-                    val path = it.path
-                    val property = it.pathProperties
-
-                    if (!property.eraseMode) {
-                        drawPath(
-                            color = property.color,
-                            path = path,
-                            style = Stroke(
-                                width = property.strokeWidth,
-                                cap = property.strokeCap,
-                                join = property.strokeJoin
-                            )
-                        )
-                    } else {
-
-                        // Source
-                        drawPath(
-                            color = Color.Transparent,
-                            path = path,
-                            style = Stroke(
-                                width = currentPathProperty.strokeWidth,
-                                cap = currentPathProperty.strokeCap,
-                                join = currentPathProperty.strokeJoin
-                            ),
-                            blendMode = BlendMode.Clear
-                        )
-                    }
-                }
-
-                if (motionEvent != MotionEvent.Idle) {
-
-                    if (!currentPathProperty.eraseMode) {
-                        drawPath(
-                            color = currentPathProperty.color,
-                            path = currentPath,
-                            style = Stroke(
-                                width = currentPathProperty.strokeWidth,
-                                cap = currentPathProperty.strokeCap,
-                                join = currentPathProperty.strokeJoin
-                            )
-                        )
-                    } else {
-                        drawPath(
-                            color = Color.Transparent,
-                            path = currentPath,
-                            style = Stroke(
-                                width = currentPathProperty.strokeWidth,
-                                cap = currentPathProperty.strokeCap,
-                                join = currentPathProperty.strokeJoin
-                            ),
-                            blendMode = BlendMode.Clear
-                        )
-                    }
-                }
-                restoreToCount(checkPoint)
+            drawContext.canvas.nativeCanvas.withSave {
+                drawMyLines(this@Canvas, paths, motionEvent, currentPath, currentPathProperty)
+                drawMyPoints(this@Canvas, points)
             }
 
             // 🔥🔥 This is for debugging
@@ -251,6 +196,84 @@ fun DrawingCanvas(
                 )
 //                drawText(text = canvasText.toString(), x = 0f, y = 60f, paint = paint)
             }
+        }
+    }
+}
+
+fun drawMyPoints(
+    drawScope: DrawScope,
+    points: MyPoints
+) {
+    points.points.forEach {
+        drawScope.drawCircle(
+            color = Color.Red,
+            radius = 10f,
+            center = Offset(it.x, it.y)
+        )
+    }
+}
+
+fun drawMyLines(
+    drawScope: DrawScope,
+    paths: List<MyLine>,
+    motionEvent: MotionEvent,
+    currentPath: Path,
+    currentPathProperty: PathProperties
+) {
+
+    paths.forEach {
+
+        val path = it.path
+        val property = it.pathProperties
+
+        if (!property.eraseMode) {
+            drawScope.drawPath(
+                color = property.color,
+                path = path,
+                style = Stroke(
+                    width = property.strokeWidth,
+                    cap = property.strokeCap,
+                    join = property.strokeJoin
+                )
+            )
+        } else {
+            // Source
+            drawScope.drawPath(
+                color = Color.Transparent,
+                path = path,
+                style = Stroke(
+                    width = currentPathProperty.strokeWidth,
+                    cap = currentPathProperty.strokeCap,
+                    join = currentPathProperty.strokeJoin
+                ),
+                blendMode = BlendMode.Clear
+            )
+        }
+    }
+
+    if (motionEvent != MotionEvent.Idle) {
+
+        if (!currentPathProperty.eraseMode) {
+            drawScope.drawPath(
+                color = currentPathProperty.color,
+                path = currentPath,
+                style = Stroke(
+                    width = currentPathProperty.strokeWidth,
+                    cap = currentPathProperty.strokeCap,
+                    join = currentPathProperty.strokeJoin
+                )
+            )
+        } else {
+            drawScope.drawPath(
+                color = Color.Transparent,
+                path = currentPath,
+                style = Stroke(
+                    width = currentPathProperty.strokeWidth,
+                    cap = currentPathProperty.strokeCap,
+                    join = currentPathProperty.strokeJoin
+                ),
+                blendMode = BlendMode.Clear
+            )
         }
     }
 }

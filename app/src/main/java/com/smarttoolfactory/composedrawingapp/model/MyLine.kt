@@ -14,6 +14,8 @@ data class UsersLine(
     override val pathProperties: PathProperties = PathProperties.DEFAULT
 ) : MyLine(path, pathProperties) {
 
+    val isEmpty get() = path.isEmpty
+
     companion object {
         val EMPTY = UsersLine(Path())
     }
