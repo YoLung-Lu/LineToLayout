@@ -111,7 +111,7 @@ object PathMeasureUtil {
                 if (currentClosingPoints.isNotEmpty()) {
                     output.add(findMiddlePoint(currentClosingPoints))
                     currentClosingPoints.clear()
-                } else {
+                } else if (output.lastOrNull() != previousPoint) {
                     // Handle previous point
                     output.add(previousPoint)
                 }
