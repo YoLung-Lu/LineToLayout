@@ -31,7 +31,7 @@ fun DrawingApp(
         drawMode = drawMode,
         motionEvent = motionEvent,
         updateLine = viewModel::updateLine,
-        clearRedo = viewModel::clearRedo,
+        clearLine = viewModel::clearLine,
         updateMotionEvent = viewModel::updateMotionEvent
     )
 }
@@ -43,7 +43,7 @@ fun DrawingApp(
     drawMode: DrawMode,
     motionEvent: MotionEvent,
     updateLine: (UsersLine) -> Unit,
-    clearRedo: () -> Unit = {},
+    clearLine: () -> Unit = {},
     updateMotionEvent: (MotionEvent) -> Unit = {}
 ) {
     // Debug.
@@ -61,7 +61,7 @@ fun DrawingApp(
             motionEvent = motionEvent,
             updateLine = updateLine,
             updateMotionEvent = updateMotionEvent,
-            clearRedo = clearRedo,
+            clearLine = clearLine,
             ifDebug = false
         )
 

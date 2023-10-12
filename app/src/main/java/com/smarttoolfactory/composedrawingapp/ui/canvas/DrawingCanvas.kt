@@ -11,8 +11,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.input.pointer.consumeDownChange
-import androidx.compose.ui.input.pointer.consumePositionChange
 import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
@@ -36,7 +34,7 @@ fun DrawingCanvas(
     motionEvent: MotionEvent,
     updateLine: (UsersLine) -> Unit,
     updateMotionEvent: (MotionEvent) -> Unit = {},
-    clearRedo: () -> Unit,
+    clearLine: () -> Unit,
     ifDebug: Boolean = false
 ) {
 
@@ -65,12 +63,6 @@ fun DrawingCanvas(
     var currentPathProperty by remember { mutableStateOf(PathProperties()) }
 
     val canvasText = remember { StringBuilder() }
-    val paint = remember {
-        Paint().apply {
-            textSize = 40f
-            color = Color.Black.toArgb()
-        }
-    }
 
     columnScope.apply {
         val drawModifier = Modifier
@@ -79,12 +71,11 @@ fun DrawingCanvas(
             .fillMaxWidth()
             .weight(1f)
             .background(Color.White)
-//            .background(getRandomColor())
             .dragMotionEvent(
                 onDragStart = { pointerInputChange ->
                     updateMotionEvent.invoke(MotionEvent.Down)
                     currentPosition = pointerInputChange.position
-                    pointerInputChange.consumeDownChange()
+                    pointerInputChange.consume()
 
                 },
                 onDrag = { pointerInputChange ->
@@ -101,24 +92,23 @@ fun DrawingCanvas(
                         }
                         currentPath.translate(change)
                     }
-                    pointerInputChange.consumePositionChange()
+                    pointerInputChange.consume()
 
                 },
                 onDragEnd = { pointerInputChange ->
                     updateMotionEvent.invoke(MotionEvent.Up)
-                    pointerInputChange.consumeDownChange()
+                    pointerInputChange.consume()
                 }
             )
 
         Canvas(modifier = drawModifier) {
-
             when (motionEvent) {
-
                 MotionEvent.Down -> {
                     if (drawMode != DrawMode.Touch) {
                         currentPath.moveTo(currentPosition.x, currentPosition.y)
                     }
 
+                    clearLine.invoke()
                     previousPosition = currentPosition
 
                 }
@@ -159,9 +149,6 @@ fun DrawingCanvas(
                             eraseMode = currentPathProperty.eraseMode
                         )
                     }
-
-                    // Since new path is drawn no need to store paths to undone
-                    clearRedo.invoke()
 
                     // If we leave this state at MotionEvent.Up it causes current path to draw
                     // line from (0,0) if this composable recomposes when draw mode is changed

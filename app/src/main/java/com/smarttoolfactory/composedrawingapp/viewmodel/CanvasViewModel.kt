@@ -11,10 +11,10 @@ import kotlinx.coroutines.flow.StateFlow
 
 class CanvasViewModel: ViewModel() {
     private val mutableLineList = mutableListOf<MyLine>()
-    private val redoLineList = mutableListOf<MyLine>()
     private val _lineList = MutableStateFlow(mutableLineList.toList())
     val lineList: StateFlow<List<MyLine>> = _lineList
 
+    // Always draw.
     private val _drawMode = MutableStateFlow(DrawMode.Draw)
     val drawMode: StateFlow<DrawMode> = _drawMode
 
@@ -29,37 +29,13 @@ class CanvasViewModel: ViewModel() {
         updateToFlow()
     }
 
-    fun updateDrawMode(newDrawMode: DrawMode) {
-        _drawMode.value = newDrawMode
-    }
-
     fun updateMotionEvent(newMotionEvent: MotionEvent) {
         _motionEvent.value = newMotionEvent
     }
 
-    fun undo() {
-        // Ignore for my use case.
-        if (mutableLineList.isNotEmpty()) {
-
-            val lastItem = mutableLineList.last()
-            mutableLineList.remove(lastItem)
-            redoLineList.add(lastItem)
-            updateToFlow()
-        }
-    }
-
-    fun redo() {
-        // Ignore for my use case.
-        if (redoLineList.isNotEmpty()) {
-
-            val last = redoLineList.removeLast()
-            mutableLineList.add(last)
-            updateToFlow()
-        }
-    }
-
-    fun clearRedo() {
-        redoLineList.clear()
+    fun clearLine() {
+        mutableLineList.clear()
+        updateToFlow()
     }
 
     private fun updateToFlow() {
