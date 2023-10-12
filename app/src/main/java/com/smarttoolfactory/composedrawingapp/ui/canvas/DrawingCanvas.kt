@@ -8,6 +8,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -21,6 +22,7 @@ import com.smarttoolfactory.composedrawingapp.gesture.MotionEvent
 import com.smarttoolfactory.composedrawingapp.gesture.dragMotionEvent
 import com.smarttoolfactory.composedrawingapp.model.MyLine
 import com.smarttoolfactory.composedrawingapp.model.MyPoints
+import com.smarttoolfactory.composedrawingapp.model.MyRects
 import com.smarttoolfactory.composedrawingapp.model.PathProperties
 import com.smarttoolfactory.composedrawingapp.model.UsersLine
 
@@ -33,6 +35,7 @@ fun DrawingCanvas(
     columnScope: ColumnScope,
     paths: List<MyLine>,
     points: MyPoints,
+    rects: MyRects,
     drawMode: DrawMode,
     motionEvent: MotionEvent,
     updateLine: (UsersLine) -> Unit,
@@ -165,6 +168,7 @@ fun DrawingCanvas(
             drawContext.canvas.nativeCanvas.withSave {
                 drawMyLines(this@Canvas, paths, motionEvent, currentPath, currentPathProperty)
                 drawMyPoints(this@Canvas, points)
+                drawMyRects(this@Canvas, rects)
             }
 
             // 🔥🔥 This is for debugging
@@ -197,6 +201,33 @@ fun DrawingCanvas(
 //                drawText(text = canvasText.toString(), x = 0f, y = 60f, paint = paint)
             }
         }
+    }
+}
+
+private val stroke = Stroke(
+    width = 6f,
+    cap = StrokeCap.Round,
+    join = StrokeJoin.Round,
+    pathEffect = PathEffect.cornerPathEffect(1f)
+    )
+fun drawMyRects(
+    drawScope: DrawScope,
+    rects: MyRects
+) {
+    rects.rects.forEach {
+        drawScope.drawRect(
+            color = Color.Gray,
+            topLeft = Offset(it.left, it.top),
+            size = Size(it.width(), it.height()),
+            alpha = 0.8f,
+            style = stroke
+        )
+        // Center.
+        drawScope.drawCircle(
+            color = Color.Gray,
+            radius = 2f,
+            center = Offset(it.centerX(), it.centerY())
+        )
     }
 }
 

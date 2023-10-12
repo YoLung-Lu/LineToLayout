@@ -6,6 +6,7 @@ import com.smarttoolfactory.composedrawingapp.gesture.MotionEvent
 import com.smarttoolfactory.composedrawingapp.model.SampleLine
 import com.smarttoolfactory.composedrawingapp.model.MyLine
 import com.smarttoolfactory.composedrawingapp.model.MyPoints
+import com.smarttoolfactory.composedrawingapp.model.MyRects
 import com.smarttoolfactory.composedrawingapp.model.UsersLine
 import com.smarttoolfactory.composedrawingapp.util.PathMeasureUtil
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,6 +21,10 @@ class CanvasViewModel: ViewModel() {
     // Points from line.
     private val _points = MutableStateFlow(MyPoints.EMPTY)
     val points: StateFlow<MyPoints> = _points
+
+    // Rects.
+    private val _rects = MutableStateFlow(MyRects.TEST)
+    val rects: StateFlow<MyRects> = _rects
 
     // Always draw.
     private val _drawMode = MutableStateFlow(DrawMode.Draw)
