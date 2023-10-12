@@ -5,6 +5,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.isUnspecified
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathMeasure
+import kotlin.math.sqrt
 
 object PathMeasureUtil {
     private val mutex = Any()
@@ -45,9 +46,10 @@ object PathMeasureUtil {
 
         synchronized(mutex) {
             val measurer = measurePath(path)
+            val pathDistance = measurer.length
 
             val output = mutableListOf<PointF>()
-            val stepDistance = distanceForEachStep(measurer.length)
+            val stepDistance = distanceForEachStep(pathDistance)
             var distanceToMeasure = 0f
             val initialTangent = measurer.getTangent(distanceToMeasure)
             if (initialTangent.isUnspecified) return emptyList() // Will throw exception if unspecified
@@ -58,7 +60,7 @@ object PathMeasureUtil {
             val initialPoint = measurer.getPosition(distanceToMeasure).toPointF()
             output.add(initialPoint)
 
-            while (distanceToMeasure < measurer.length) {
+            while (distanceToMeasure < pathDistance) {
                 distanceToMeasure += stepDistance
                 val tangent = measurer.getTangent(distanceToMeasure)
                 val direction = directionFromTangent(tangent)
@@ -72,11 +74,55 @@ object PathMeasureUtil {
                 directionY = direction.second
             }
 
-            val lastPoint = measurer.getPosition(measurer.length).toPointF()
+            val lastPoint = measurer.getPosition(pathDistance).toPointF()
             output.add(lastPoint)
 
-            return output
+            return reduceClosePoints(output, pathDistance)
         }
+    }
+
+    /**
+     * Reduces points that are close to each other.
+     */
+    private fun reduceClosePoints(points: List<PointF>, length: Float): List<PointF> {
+        if (points.isEmpty()) return emptyList()
+
+        // TODO: Magic number, should depend on size of Rect later.
+        val closeDistance = length / 10
+
+        val output = mutableListOf<PointF>()
+        val currentClosingPoints = mutableListOf<PointF>()
+
+        var previousPoint = points.first()
+        points.forEachIndexed { index, point ->
+            if (index == 0) {
+                output.add(point)
+                return@forEachIndexed
+            }
+
+            val distance = previousPoint.distanceTo(point)
+            if (distance < closeDistance) {
+                if (currentClosingPoints.isEmpty() || currentClosingPoints.last() != previousPoint) {
+                    currentClosingPoints.add(previousPoint)
+                }
+                currentClosingPoints.add(point)
+            } else {
+                // Handle closing points
+                if (currentClosingPoints.isNotEmpty()) {
+                    output.add(findMiddlePoint(currentClosingPoints))
+                    currentClosingPoints.clear()
+                } else if (output.lastOrNull() != previousPoint) {
+                    // Handle previous point
+                    output.add(previousPoint)
+                }
+
+                previousPoint = point
+            }
+        }
+
+        output.add(points.last())
+
+        return output
     }
 
     private fun measurePath(path: Path): PathMeasure {
@@ -98,4 +144,10 @@ object PathMeasureUtil {
     }
 
     private fun Offset.toPointF() = PointF(x, y)
+
+    private fun findMiddlePoint(list: List<PointF>): PointF {
+        require(list.isNotEmpty()) { "List should not be empty" }
+
+        return list[list.size / 2]
+    }
 }

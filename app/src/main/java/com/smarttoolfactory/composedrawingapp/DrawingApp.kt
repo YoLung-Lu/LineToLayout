@@ -11,6 +11,7 @@ import androidx.compose.ui.unit.dp
 import com.smarttoolfactory.composedrawingapp.gesture.MotionEvent
 import com.smarttoolfactory.composedrawingapp.model.MyLine
 import com.smarttoolfactory.composedrawingapp.model.MyPoints
+import com.smarttoolfactory.composedrawingapp.model.MyRects
 import com.smarttoolfactory.composedrawingapp.model.UsersLine
 import com.smarttoolfactory.composedrawingapp.ui.canvas.DrawingCanvas
 import com.smarttoolfactory.composedrawingapp.ui.menu.LayoutInfoMenus
@@ -24,6 +25,7 @@ fun DrawingApp(
 ) {
     val paths by viewModel.lineList.collectAsState()
     val points by viewModel.points.collectAsState()
+    val rects by viewModel.rects.collectAsState()
     val drawMode by viewModel.drawMode.collectAsState()
     val motionEvent by viewModel.motionEvent.collectAsState()
 
@@ -31,6 +33,7 @@ fun DrawingApp(
         paddingValues = paddingValues,
         paths = paths,
         points = points,
+        rects = rects,
         drawMode = drawMode,
         motionEvent = motionEvent,
         updateLine = viewModel::updateLine,
@@ -44,6 +47,7 @@ fun DrawingApp(
     paddingValues: PaddingValues,
     paths: List<MyLine>,
     points: MyPoints,
+    rects: MyRects,
     drawMode: DrawMode,
     motionEvent: MotionEvent,
     updateLine: (UsersLine) -> Unit,
@@ -62,6 +66,7 @@ fun DrawingApp(
             columnScope = this,
             paths = paths,
             points = points,
+            rects = rects,
             drawMode = drawMode,
             motionEvent = motionEvent,
             updateLine = updateLine,
