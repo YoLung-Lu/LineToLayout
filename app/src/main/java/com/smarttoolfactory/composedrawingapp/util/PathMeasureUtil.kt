@@ -144,11 +144,6 @@ object PathMeasureUtil {
     }
 
     private fun Offset.toPointF() = PointF(x, y)
-    private fun PointF.distanceTo(other: PointF): Float {
-        val dx = x - other.x
-        val dy = y - other.y
-        return sqrt((dx * dx + dy * dy).toDouble()).toFloat()
-    }
 
     private fun findMiddlePoint(list: List<PointF>): PointF {
         require(list.isNotEmpty()) { "List should not be empty" }
